@@ -1,0 +1,6 @@
+{
+  "name": "JoshShoes",
+  "description": "Premium footwear and streetwear storefront with high-performance sneakers and apparel.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
