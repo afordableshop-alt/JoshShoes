@@ -12,6 +12,11 @@ import CheckoutModal from '../components/CheckoutModal';
 import OrderHistoryModal from '../components/OrderHistoryModal';
 import ReviewSection from '../components/ReviewSection';
 import FooterDocModal, { DocType } from '../components/FooterDocModal';
+import WishlistModal from '../components/WishlistModal';
+import CompareModal from '../components/CompareModal';
+import SizeGuideModal from '../components/SizeGuideModal';
+import NewsletterModal from '../components/NewsletterModal';
+import ProductRadarChart from '../components/ProductRadarChart';
 import { useStore } from '../context/StoreContext';
 
 const REGIONS = ['US', 'UK', 'EU', 'CA', 'AU'];
@@ -80,7 +85,7 @@ export default function Storefront() {
   const [isCurrencyDropdownOpen, setIsCurrencyDropdownOpen] = useState(false);
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   
-  const { wishlist, toggleWishlist: storeToggleWishlist, isDarkMode, toggleDarkMode, isCheckoutOpen, setIsCheckoutOpen, cart, addToCart, orders, setIsOrdersOpen } = useStore();
+  const { wishlist, toggleWishlist: storeToggleWishlist, isWishlistOpen, setIsWishlistOpen, isDarkMode, toggleDarkMode, isCheckoutOpen, setIsCheckoutOpen, cart, addToCart, orders, setIsOrdersOpen } = useStore();
 
   const scrollToProducts = (tabName?: ProductTab) => {
     setShowWishlistOnly(false);
@@ -91,8 +96,7 @@ export default function Storefront() {
   };
 
   const handleWishlistClick = () => {
-    setShowWishlistOnly(true);
-    document.getElementById('discover-more')?.scrollIntoView({ behavior: 'smooth' });
+    setIsWishlistOpen(true);
   };
 
   const [notifyEmail, setNotifyEmail] = useState('');
@@ -174,10 +178,10 @@ export default function Storefront() {
       if (prev.find(p => p.id === product.id)) {
         return prev.filter(p => p.id !== product.id);
       }
-      if (prev.length < 2) {
+      if (prev.length < 4) {
         return [...prev, product];
       }
-      return [prev[1], product]; // Keep max 2
+      return [...prev.slice(1), product];
     });
   };
 
@@ -1131,6 +1135,11 @@ export default function Storefront() {
                   Experience ultimate performance and style with the {quickViewProduct.name}. Designed with precision engineering for maximum comfort, durability, and a premium streetwear aesthetic.
                 </p>
 
+                {/* Performance Radar Spectrum Chart */}
+                <div className="mb-6">
+                  <ProductRadarChart productName={quickViewProduct.name} />
+                </div>
+
                 {/* Color Selection */}
                 <div className="mb-6" role="group" aria-label="Shoe Color Options">
                   <div className="flex items-center justify-between mb-3">
@@ -1268,80 +1277,22 @@ export default function Storefront() {
         )}
       </AnimatePresence>
 
-      {/* Size Guide Modal */}
-      <AnimatePresence>
-        {isSizeGuideOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Shoe Size Guide and Conversion Table"
-            className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-sm"
-            onClick={() => setIsSizeGuideOpen(false)}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-white rounded-3xl overflow-hidden max-w-2xl w-full flex flex-col shadow-2xl max-h-[90vh]"
-              onClick={e => e.stopPropagation()}
-            >
-              <div className="p-6 border-b border-zinc-100 flex items-center justify-between bg-zinc-50">
-                <h3 className="text-xl font-black tracking-tight">Size Guide</h3>
-                <button 
-                  onClick={() => setIsSizeGuideOpen(false)}
-                  aria-label="Close size guide dialog"
-                  className="text-zinc-400 hover:text-zinc-900 transition-colors p-2 rounded-full hover:bg-zinc-200 cursor-pointer"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              <div className="p-6 overflow-y-auto">
-                <p className="text-sm text-zinc-500 mb-6">
-                  Use the chart below to find your correct size. Our shoes fit true to size. If you are between sizes, we recommend sizing up.
-                </p>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="bg-zinc-100">
-                        <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-zinc-600">US</th>
-                        <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-zinc-600">UK</th>
-                        <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-zinc-600">EU</th>
-                        <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-zinc-600">CM</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-zinc-100">
-                      {[
-                        { us: '7', uk: '6', eu: '40', cm: '25' },
-                        { us: '7.5', uk: '6.5', eu: '40.5', cm: '25.5' },
-                        { us: '8', uk: '7', eu: '41', cm: '26' },
-                        { us: '8.5', uk: '7.5', eu: '42', cm: '26.5' },
-                        { us: '9', uk: '8', eu: '42.5', cm: '27' },
-                        { us: '9.5', uk: '8.5', eu: '43', cm: '27.5' },
-                        { us: '10', uk: '9', eu: '44', cm: '28' },
-                        { us: '10.5', uk: '9.5', eu: '44.5', cm: '28.5' },
-                        { us: '11', uk: '10', eu: '45', cm: '29' },
-                        { us: '12', uk: '11', eu: '46', cm: '30' },
-                      ].map((size, i) => (
-                        <tr key={i} className="hover:bg-zinc-50 transition-colors">
-                          <td className="px-4 py-3 text-sm font-bold text-zinc-900">{size.us}</td>
-                          <td className="px-4 py-3 text-sm text-zinc-600">{size.uk}</td>
-                          <td className="px-4 py-3 text-sm text-zinc-600">{size.eu}</td>
-                          <td className="px-4 py-3 text-sm text-zinc-600">{size.cm}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Size Guide Modal Component */}
+      <SizeGuideModal 
+        isOpen={isSizeGuideOpen} 
+        onClose={() => setIsSizeGuideOpen(false)} 
+      />
 
-      {/* Floating Compare Button Bar */}
+      {/* Wishlist Modal Component */}
+      <WishlistModal 
+        allProducts={ALL_PRODUCTS} 
+        onQuickView={(product) => setQuickViewProduct(product)} 
+      />
+
+      {/* Newsletter Subscription Popup */}
+      <NewsletterModal />
+
+      {/* Floating Compare Bar */}
       <AnimatePresence>
         {compareList.length > 0 && (
           <motion.div
@@ -1363,8 +1314,8 @@ export default function Storefront() {
               ))}
             </div>
             <div className="flex flex-col">
-              <span className="text-xs font-bold uppercase tracking-widest">{compareList.length}/2 Selected</span>
-              <span className="text-[10px] text-zinc-400">Add 2 items to compare</span>
+              <span className="text-xs font-bold uppercase tracking-widest">{compareList.length}/4 Selected</span>
+              <span className="text-[10px] text-zinc-400">Select up to 4 items</span>
             </div>
             <button 
               onClick={() => setIsCompareModalOpen(true)}
@@ -1372,7 +1323,7 @@ export default function Storefront() {
               aria-label="Open product comparison view"
               className="ml-4 bg-orange-500 disabled:bg-zinc-700 text-white text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full transition-colors cursor-pointer"
             >
-              Compare
+              Compare Side-By-Side
             </button>
             <button 
               onClick={() => setCompareList([])}
@@ -1385,99 +1336,15 @@ export default function Storefront() {
         )}
       </AnimatePresence>
 
-      {/* Compare Modal */}
-      <AnimatePresence>
-        {isCompareModalOpen && compareList.length === 2 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Product Comparison View"
-            className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-md"
-            onClick={() => setIsCompareModalOpen(false)}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-white rounded-3xl overflow-hidden max-w-4xl w-full shadow-2xl flex flex-col max-h-[90vh]"
-              onClick={e => e.stopPropagation()}
-            >
-              <div className="p-6 border-b border-zinc-100 flex items-center justify-between bg-zinc-50">
-                <h3 className="text-xl font-black tracking-tight uppercase">Compare Products</h3>
-                <button 
-                  onClick={() => setIsCompareModalOpen(false)}
-                  aria-label="Close product comparison view"
-                  className="text-zinc-400 hover:text-zinc-900 transition-colors p-2 rounded-full hover:bg-zinc-200 cursor-pointer"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              <div className="p-6 md:p-10 overflow-y-auto">
-                <div className="grid grid-cols-2 gap-8 md:gap-16">
-                  {compareList.map((product, idx) => (
-                    <div key={idx} className="flex flex-col">
-                      <div className="aspect-square bg-zinc-100 rounded-2xl overflow-hidden mb-6 relative">
-                        <img src={product.image} alt={product.name} className="w-full h-full object-cover object-center" />
-                        <button 
-                          onClick={() => setCompareList(prev => prev.filter(p => p.id !== product.id))}
-                          aria-label={`Remove ${product.name} from comparison`}
-                          className="absolute top-4 right-4 bg-white/90 p-2 rounded-full text-zinc-400 hover:text-red-500 shadow-sm cursor-pointer"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                      <p className="text-xs font-bold text-orange-500 uppercase tracking-widest mb-2">{product.category}</p>
-                      <h4 className="text-2xl font-black tracking-tighter mb-2">{product.name}</h4>
-                      <p className="text-lg font-bold text-zinc-900 mb-8">{product.price}</p>
-                      
-                      <div className="space-y-4 text-sm">
-                        <div className="flex justify-between border-b border-zinc-100 pb-2">
-                          <span className="text-zinc-500">Weight</span>
-                          <span className="font-bold">{idx === 0 ? '180g' : '210g'}</span>
-                        </div>
-                        <div className="flex justify-between border-b border-zinc-100 pb-2">
-                          <span className="text-zinc-500">Drop</span>
-                          <span className="font-bold">{idx === 0 ? '8mm' : '10mm'}</span>
-                        </div>
-                        <div className="flex justify-between border-b border-zinc-100 pb-2">
-                          <span className="text-zinc-500">Cushioning</span>
-                          <span className="font-bold">{idx === 0 ? 'Maximum' : 'Responsive'}</span>
-                        </div>
-                        <div className="flex justify-between border-b border-zinc-100 pb-2">
-                          <span className="text-zinc-500">Material</span>
-                          <span className="font-bold">{idx === 0 ? 'Engineered Mesh' : 'Primeknit'}</span>
-                        </div>
-                      </div>
-                      
-                      <button 
-                        onClick={() => {
-                          addToCart({
-                            id: product.id,
-                            name: product.name,
-                            price: product.price,
-                            numericPrice: product.numericPrice,
-                            image: product.image,
-                            quantity: 1
-                          });
-                          setIsCompareModalOpen(false);
-                          setIsCheckoutOpen(true);
-                        }}
-                        aria-label={`Add ${product.name} to cart from comparison`}
-                        className="mt-8 w-full bg-zinc-900 text-white py-4 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-orange-500 transition-colors cursor-pointer"
-                      >
-                        Add to Cart
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Compare Modal Component */}
+      <CompareModal 
+        isOpen={isCompareModalOpen}
+        onClose={() => setIsCompareModalOpen(false)}
+        compareList={compareList}
+        allProducts={ALL_PRODUCTS}
+        onRemoveFromCompare={(id) => setCompareList(prev => prev.filter(p => p.id !== id))}
+        onAddToCompare={(product) => setCompareList(prev => prev.length < 4 ? [...prev, product] : [...prev.slice(1), product])}
+      />
 
       <CheckoutModal
         isOpen={isCheckoutOpen}

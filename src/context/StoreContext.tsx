@@ -43,6 +43,9 @@ export interface Order {
 interface StoreContextType {
   wishlist: string[];
   toggleWishlist: (productId: string) => void;
+  clearWishlist: () => void;
+  isWishlistOpen: boolean;
+  setIsWishlistOpen: (isOpen: boolean) => void;
   cart: CartItem[];
   addToCart: (item: CartItem) => void;
   removeFromCart: (productId: string, size?: string, color?: string) => void;
@@ -144,6 +147,7 @@ const INITIAL_ORDERS: Order[] = [
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [wishlist, setWishlist] = useState<string[]>([]);
+  const [isWishlistOpen, setIsWishlistOpen] = useState(false);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [orders, setOrders] = useState<Order[]>(INITIAL_ORDERS);
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -165,6 +169,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         console.error('Failed to parse saved orders');
       }
     }
+    const savedWishlist = localStorage.getItem('josh_wishlist');
+    if (savedWishlist) {
+      try {
+        setWishlist(JSON.parse(savedWishlist));
+      } catch (e) {
+        console.error('Failed to parse saved wishlist');
+      }
+    }
   }, []);
 
   const toggleDarkMode = () => {
@@ -182,11 +194,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   };
 
   const toggleWishlist = (productId: string) => {
-    setWishlist(prev => 
-      prev.includes(productId) 
+    setWishlist(prev => {
+      const updated = prev.includes(productId)
         ? prev.filter(id => id !== productId)
-        : [...prev, productId]
-    );
+        : [...prev, productId];
+      localStorage.setItem('josh_wishlist', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const clearWishlist = () => {
+    setWishlist([]);
+    localStorage.removeItem('josh_wishlist');
   };
 
   const addToCart = (item: CartItem) => {
@@ -227,7 +246,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   return (
     <StoreContext.Provider value={{
-      wishlist, toggleWishlist,
+      wishlist, toggleWishlist, clearWishlist, isWishlistOpen, setIsWishlistOpen,
       cart, addToCart, removeFromCart, updateCartQuantity, clearCart, cartTotal,
       orders, addOrder,
       isDarkMode, toggleDarkMode,
